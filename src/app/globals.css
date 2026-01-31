@@ -2,25 +2,88 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1a1a1a;
+  --primary: #8ca546;
+  --primary-foreground: #ffffff;
+  --secondary: #d4a574;
+  --secondary-foreground: #1a1a1a;
+  --accent: #8fbc8f;
+  --accent-foreground: #1a1a1a;
+  --muted: #f7f7f5;
+  --muted-foreground: #6b6b6b;
+  --border: #e8e8e5;
+  --ring: #8ca546;
+  --chat-bg: #f0f5f1;
+  --chat-foreground: #1a1a1a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-chat-bg: var(--chat-bg);
+  --color-chat-foreground: var(--chat-foreground);
+  --font-sans: var(--font-inter), sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0f0f0f;
+    --foreground: #f5f5f5;
+    --primary: #a3c254;
+    --primary-foreground: #ffffff;
+    --secondary: #d4a574;
+    --secondary-foreground: #1a1a1a;
+    --accent: #6b8f6b;
+    --accent-foreground: #ffffff;
+    --muted: #262626;
+    --muted-foreground: #a3a3a3;
+    --border: #333333;
+    --ring: #a3c254;
+    --chat-bg: #0a0a0a;
+    --chat-foreground: #f5f5f5;
   }
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+/* Custom scrollbar for chat */
+.chat-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background: #404040;
+  border-radius: 3px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #555555;
+}
+
+/* Vertical text for collapsed chat */
+.writing-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
 }
