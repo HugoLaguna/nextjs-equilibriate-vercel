@@ -1,8 +1,23 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export function Footer() {
   return (
     <footer className="border-t border-border bg-muted/50">
+      <div className="bg-primary/10 py-3">
+        <div className="mx-auto max-w-7xl px-4 lg:px-8 flex items-center justify-center gap-3">
+          <Image
+            src="/assets/celion_logo.png"
+            alt="Logo Celion"
+            width={160}
+            height={160}
+            className="object-contain"
+          />
+          <span className="text-sm font-medium text-black">
+            Distribuidor oficial de Celion
+          </span>
+        </div>
+      </div>
       <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">

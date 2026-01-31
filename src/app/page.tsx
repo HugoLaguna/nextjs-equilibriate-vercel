@@ -1,40 +1,7 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Leaf, Truck, Shield, Star } from "lucide-react";
-
-const products = [
-  {
-    id: 1,
-    slug: "te-verde-ancestral",
-    name: "Té Verde Ancestral",
-    description: "Mezcla tradicional de hojas de té verde con notas herbales.",
-    price: 35000,
-    image: "/products/te-verde.jpg",
-  },
-  {
-    id: 2,
-    slug: "te-chai-especiado",
-    name: "Té Chai Especiado",
-    description: "Intenso blend de especias con canela, cardamomo y jengibre.",
-    price: 42000,
-    image: "/products/te-chai.jpg",
-  },
-  {
-    id: 3,
-    slug: "te-matcha-premium",
-    name: "Té Matcha Premium",
-    description: "Matcha ceremonial de grado premium, importado de Japón.",
-    price: 68000,
-    image: "/products/te-matcha.jpg",
-  },
-  {
-    id: 4,
-    slug: "te-rooibos-frutal",
-    name: "Té Rooibos Frutal",
-    description: "Rooibos sudafricano con frutas tropicales y flores.",
-    price: 38000,
-    image: "/products/te-rooibos.jpg",
-  },
-];
+import { products, formatPrice } from "@/data/products";
 
 const features = [
   {
@@ -53,14 +20,6 @@ const features = [
     description: "Satisfacción garantizada o te devolvemos tu dinero.",
   },
 ];
-
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 0,
-  }).format(price);
-}
 
 export default function HomePage() {
   return (
@@ -140,8 +99,13 @@ export default function HomePage() {
                 className="group"
               >
                 <article className="bg-muted/50 rounded-2xl overflow-hidden border border-border hover:border-primary/50 transition-all hover:shadow-lg">
-                  <div className="aspect-square bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                    <Leaf className="h-16 w-16 text-primary/40 group-hover:scale-110 transition-transform" />
+                  <div className="aspect-square bg-gradient-to-br from-primary/20 to-secondary/20 relative overflow-hidden">
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform"
+                    />
                   </div>
                   <div className="p-4">
                     <div className="flex items-center gap-1 mb-2">
