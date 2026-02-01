@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, PanelRightClose, PanelRightOpen, AlertCircle, Plus, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useChatContext } from "@/context/ChatContext";
-import * as ScrollArea from "@radix-ui/react-scroll-area";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useChat } from "@/hooks/useChat";
@@ -19,13 +18,43 @@ export function ChatPanel() {
   const { conversation, conversations, sendMessage, createConversation, setActiveConversation, isLoading, error } = useChat();
   const [showConversations, setShowConversations] = useState(false);
 
+  const messages = conversation?.messages || [];
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [conversation?.messages]);
+  }, [conversation?.messages, messages.length]);
+
+  // Auto-scroll cuando cambia el último mensaje (streaming)
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage?.role === "assistant") {
+      scrollToBottom();
+    }
+  }, [messages[messages.length - 1]?.content]);
+
+  // Bloquear scroll del body cuando el chat móvil esté abierto
+  useEffect(() => {
+    if (isMobileOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    }
+
+    // Cleanup
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
+  }, [isMobileOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,8 +68,6 @@ export function ChatPanel() {
     await sendMessage(input);
     setInput("");
   };
-
-  const messages = conversation?.messages || [];
   const remainingChars = MAX_MESSAGE_LENGTH - input.length;
   const isOverLimit = remainingChars < 0;
 
@@ -48,7 +75,7 @@ export function ChatPanel() {
   const MobileToggle = () => (
     <button
       onClick={() => setIsMobileOpen(!isMobileOpen)}
-      className="lg:hidden fixed bottom-4 right-4 z-50 bg-primary text-primary-foreground p-4 rounded-full shadow-lg hover:bg-primary/90 transition-all"
+      className="lg:hidden fixed bottom-4 right-4 z-90 bg-primary text-primary-foreground p-4 rounded-full shadow-lg hover:bg-primary/90 transition-all"
     >
       <Bot className="h-6 w-6" />
     </button>
@@ -166,10 +193,9 @@ export function ChatPanel() {
         {!isCollapsed && (
           <>
             {/* Messages */}
-            <ScrollArea.Root className="flex-1 overflow-hidden">
-              <ScrollArea.Viewport className="h-full w-full p-4 chat-scrollbar">
-                <div className="space-y-4">
-                  {messages.map((message) => (
+            <div className="flex-1 overflow-y-auto overflow-x-hidden p-4">
+              <div className="space-y-4">
+                {messages.map((message) => (
                     <div
                       key={message.id}
                       className={cn(
@@ -210,17 +236,10 @@ export function ChatPanel() {
                         )}
                       </div>
                     </div>
-                  ))}
-                  <div ref={messagesEndRef} />
-                </div>
-              </ScrollArea.Viewport>
-              <ScrollArea.Scrollbar
-                className="flex select-none touch-none p-0.5 bg-transparent transition-colors duration-150 ease-out data-[orientation=vertical]:w-2"
-                orientation="vertical"
-              >
-                <ScrollArea.Thumb className="flex-1 bg-white/20 rounded-full relative" />
-              </ScrollArea.Scrollbar>
-            </ScrollArea.Root>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+            </div>
 
             {/* Input */}
             <form onSubmit={handleSubmit} className="p-4 border-t border-white/10">
@@ -282,10 +301,18 @@ export function ChatPanel() {
 
       {/* Mobile Chat Modal */}
       {isMobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 bg-chat-bg text-chat-foreground flex flex-col">
+        <div className="lg:hidden fixed inset-0 z-100 bg-chat-bg text-chat-foreground flex flex-col">
+          {/* Close Button - Fixed */}
+          <button
+            onClick={() => setIsMobileOpen(false)}
+            className="fixed top-4 right-4 z-110 p-2 bg-chat-bg/80 backdrop-blur-sm border border-white/10 hover:bg-white/10 rounded-full transition-colors shadow-lg"
+          >
+            <PanelRightClose className="h-5 w-5" />
+          </button>
+
           {/* Header */}
           <div className="flex flex-col border-b border-white/10">
-            <div className="flex items-center justify-between p-4">
+            <div className="flex items-center p-4 pr-16">
               <div className="flex items-center gap-3">
                 <div className="bg-primary/20 p-2 rounded-full">
                   <Bot className="h-5 w-5 text-primary" />
@@ -295,12 +322,6 @@ export function ChatPanel() {
                   <p className="text-xs text-chat-foreground/60">En línea</p>
                 </div>
               </div>
-              <button
-                onClick={() => setIsMobileOpen(false)}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-              >
-                <PanelRightClose className="h-5 w-5" />
-              </button>
             </div>
 
             {/* Conversation Selector Mobile */}
@@ -355,10 +376,9 @@ export function ChatPanel() {
           </div>
 
           {/* Messages */}
-          <ScrollArea.Root className="flex-1 overflow-hidden">
-            <ScrollArea.Viewport className="h-full w-full p-4">
-              <div className="space-y-4">
-                {messages.map((message) => (
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-4">
+            <div className="space-y-4">
+              {messages.map((message) => (
                   <div
                     key={message.id}
                     className={cn(
@@ -399,11 +419,10 @@ export function ChatPanel() {
                       )}
                     </div>
                   </div>
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
-            </ScrollArea.Viewport>
-          </ScrollArea.Root>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+          </div>
 
           {/* Input */}
           <form onSubmit={handleSubmit} className="p-4 border-t border-white/10">
@@ -418,12 +437,15 @@ export function ChatPanel() {
                 <input
                   type="text"
                   value={input}
+                  style={{
+                    fontSize: "16px"
+                  }}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Escribe tu mensaje..."
                   maxLength={MAX_MESSAGE_LENGTH}
                   disabled={isLoading}
                   className={cn(
-                    "flex-1 bg-white border rounded-full px-4 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 placeholder:text-gray-400 disabled:opacity-50",
+                    "flex-1 bg-white border rounded-full px-4 py-2 text-gray-900 focus:outline-none focus:ring-2 placeholder:text-gray-400 disabled:opacity-50",
                     isOverLimit
                       ? "border-red-500 focus:ring-red-500/50"
                       : "border-gray-200 focus:ring-primary/50"
