@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Star, ShoppingBag, Truck, Shield, Clock } from "lucide-react";
+import { ArrowLeft, Star, ShoppingBag, Truck, Shield, Clock, MessageCircle } from "lucide-react";
+import { OpenChatButton } from "@/components/chat/OpenChatButton";
 import { products, getProductBySlug, formatPrice } from "@/data/products";
 
 interface ProductPageProps {
@@ -111,7 +112,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
 
             {/* Add to Cart */}
-            <div className="mt-8 flex gap-4">
+            <div className="mt-8 flex flex-col gap-3">
               <button
                 disabled={!product.available}
                 className={`flex-1 flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-colors ${
@@ -123,6 +124,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 <ShoppingBag className="h-5 w-5" />
                 {product.available ? 'Agregar al Carrito' : 'No Disponible'}
               </button>
+              <OpenChatButton className="flex-1 flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-colors bg-secondary text-secondary-foreground hover:bg-secondary/90 cursor-pointer">
+                <MessageCircle className="h-5 w-5" />
+                Asistente Nutricionista Inteligente
+              </OpenChatButton>
             </div>
 
             {/* Product Details */}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, PanelRightClose, PanelRightOpen, AlertCircle, Plus, MessageSquare } from "lucide-react";
+import { Send, Bot, User, PanelRightClose, PanelRightOpen, AlertCircle, Plus, MessageSquare, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useChatContext } from "@/context/ChatContext";
 import ReactMarkdown from "react-markdown";
@@ -156,15 +156,18 @@ export function ChatPanel() {
             <div className="px-4 pb-3 relative">
               <button
                 onClick={() => setShowConversations(!showConversations)}
-                className="w-full flex items-center justify-between px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors text-sm"
+                className="w-full flex items-center justify-between px-3 py-2.5 bg-white/10 hover:bg-white/15 border border-white/20 rounded-lg transition-all text-sm shadow-sm"
               >
                 <div className="flex items-center gap-2">
                   <MessageSquare className="h-4 w-4" />
                   <span className="truncate">{conversation?.title || "Nueva conversación"}</span>
                 </div>
-                <span className="text-xs text-chat-foreground/40">
-                  {conversations.length}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-chat-foreground/50 bg-white/10 px-1.5 py-0.5 rounded">
+                    {conversations.length}
+                  </span>
+                  <ChevronDown className={cn("h-4 w-4 transition-transform", showConversations && "rotate-180")} />
+                </div>
               </button>
 
               {/* Dropdown */}
@@ -354,15 +357,18 @@ export function ChatPanel() {
             <div className="px-4 pb-3 relative">
               <button
                 onClick={() => setShowConversations(!showConversations)}
-                className="w-full flex items-center justify-between px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors text-sm"
+                className="w-full flex items-center justify-between px-3 py-2.5 bg-white/10 hover:bg-white/15 border border-white/20 rounded-lg transition-all text-sm shadow-sm"
               >
                 <div className="flex items-center gap-2">
                   <MessageSquare className="h-4 w-4" />
                   <span className="truncate">{conversation?.title || "Nueva conversación"}</span>
                 </div>
-                <span className="text-xs text-chat-foreground/40">
-                  {conversations.length}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-chat-foreground/50 bg-white/10 px-1.5 py-0.5 rounded">
+                    {conversations.length}
+                  </span>
+                  <ChevronDown className={cn("h-4 w-4 transition-transform", showConversations && "rotate-180")} />
+                </div>
               </button>
 
               {/* Dropdown Mobile */}
