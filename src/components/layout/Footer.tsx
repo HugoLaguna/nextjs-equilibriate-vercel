@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ThemeSelector } from "@/components/theme/ThemeSelector";
 
 export function Footer() {
   return (
@@ -19,8 +20,8 @@ export function Footer() {
         </div>
       </div>
       <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="col-span-1 md:col-span-2">
+        <div className="flex flex-wrap gap-8">
+          <div className="flex-[2_1_300px]">
             <Link href="/" className="text-2xl font-bold text-primary">
               Equilibriate
             </Link>
@@ -31,7 +32,7 @@ export function Footer() {
             </p>
           </div>
 
-          <div>
+          <div className="flex-[1_1_200px]">
             <h3 className="text-sm font-semibold text-foreground">Navegación</h3>
             <ul className="mt-4 space-y-2">
               <li>
@@ -57,15 +58,21 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">Legal</h3>
-            <ul className="mt-4 space-y-2">
-              <li>
-                <Link href="/terminos-y-condiciones" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Términos y Condiciones
-                </Link>
-              </li>
-            </ul>
+          <div className="flex-[1_1_200px]">
+            <div className="space-y-6">
+              <ThemeSelector />
+
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">Legal</h3>
+                <ul className="mt-4 space-y-2">
+                  <li>
+                    <Link href="/terminos-y-condiciones" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                      Términos y Condiciones
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
 

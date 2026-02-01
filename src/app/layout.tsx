@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/context/AuthContext";
 import { ChatProvider } from "@/context/ChatContext";
+import { ThemeProvider } from "@/context/ThemeContext";
+import { ThemeInitializer } from "@/components/theme/ThemeInitializer";
 import { LayoutShell } from "@/components/layout/LayoutShell";
 
 const inter = Inter({
@@ -32,13 +35,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
+      <head>
+        <ThemeInitializer />
+      </head>
       <body
         className={`${inter.variable} antialiased`}
       >
-        <ChatProvider>
-          <LayoutShell>{children}</LayoutShell>
-        </ChatProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <ChatProvider>
+              <LayoutShell>{children}</LayoutShell>
+            </ChatProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

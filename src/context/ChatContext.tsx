@@ -1,6 +1,8 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+
+const CHAT_COLLAPSED_KEY = "chat_collapsed";
 
 interface ChatContextType {
   isCollapsed: boolean;
@@ -11,9 +13,26 @@ interface ChatContextType {
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // Por defecto cerrado (true = collapsed)
+  const [isCollapsed, setIsCollapsedState] = useState(true);
 
-  const toggleCollapsed = () => setIsCollapsed((prev) => !prev);
+  // Leer estado de localStorage al montar
+  useEffect(() => {
+    const stored = localStorage.getItem(CHAT_COLLAPSED_KEY);
+    if (stored !== null) {
+      setIsCollapsedState(stored === "true");
+    }
+  }, []);
+
+  // Guardar en localStorage cuando cambie
+  const setIsCollapsed = (collapsed: boolean) => {
+    setIsCollapsedState(collapsed);
+    localStorage.setItem(CHAT_COLLAPSED_KEY, String(collapsed));
+  };
+
+  const toggleCollapsed = () => {
+    setIsCollapsed(!isCollapsed);
+  };
 
   return (
     <ChatContext.Provider value={{ isCollapsed, setIsCollapsed, toggleCollapsed }}>

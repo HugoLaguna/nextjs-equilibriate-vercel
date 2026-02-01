@@ -56,6 +56,32 @@ export function ChatPanel() {
     };
   }, [isMobileOpen]);
 
+  // Listener para abrir el chat desde cualquier lugar via postMessage
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // Solo procesar mensajes con la estructura esperada
+      if (event.data?.type === 'OPEN_CHAT') {
+        // Detectar si es móvil o desktop
+        const isMobile = window.innerWidth < 1024; // lg breakpoint
+
+        if (isMobile) {
+          setIsMobileOpen(true);
+        } else {
+          // En desktop, expandir el chat si está colapsado
+          if (isCollapsed) {
+            toggleCollapsed();
+          }
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, [isCollapsed, toggleCollapsed]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
@@ -185,7 +211,7 @@ export function ChatPanel() {
             className="flex-1 flex items-center justify-center hover:bg-white/5 transition-colors"
           >
             <span className="writing-vertical text-xs font-medium text-chat-foreground/60 tracking-wider">
-              CHAT
+              ASISTENTE NUTRICIONAL INTELIGENTE
             </span>
           </button>
         )}

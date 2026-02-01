@@ -33,7 +33,7 @@ export const products: Product[] = [
     detailDescription: `Muno T está formulado para ayudar a reducir la inflamación celular y eliminar las toxinas que se acumulan en el organismo; con una mezcla de hierbas naturales, Muno T ayuda especialmente a desintoxicar hígado, riñones y sistema digestivo, además, es una excelente alternativa para promover la óptima absorción de los nutrientes que nuestro cuerpo necesita.
 
 En un mundo donde el estrés, la contaminación y las toxinas afectan nuestra calidad de vida, es necesario contar con un aliado que nos ayude a combatir los efectos negativos del día a día. MUNO-T no es solo un té detox; es un ritual de bienestar diseñado para revitalizar cada célula de tu cuerpo y restaurar su equilibrio natural, inspirado en las antiguas tradiciones de la medicina oriental y en los secretos de la naturaleza, MUNO-T es una fusión de ingredientes poderosos que han sido utilizados durante siglos por sus propiedades curativas y desintoxicantes.`,
-    price: 320000,
+    price: 84000,
     available: true,
     image: "/assets/ofmunot-G-scaled.png",
     calories: 0,

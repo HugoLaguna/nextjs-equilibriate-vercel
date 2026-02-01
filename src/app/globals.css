@@ -35,23 +35,21 @@
   --font-sans: var(--font-inter), sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f0f0f;
-    --foreground: #f5f5f5;
-    --primary: #a3c254;
-    --primary-foreground: #ffffff;
-    --secondary: #d4a574;
-    --secondary-foreground: #1a1a1a;
-    --accent: #6b8f6b;
-    --accent-foreground: #ffffff;
-    --muted: #262626;
-    --muted-foreground: #a3a3a3;
-    --border: #333333;
-    --ring: #a3c254;
-    --chat-bg: color-mix(in srgb, var(--primary) 10%, var(--background));
-    --chat-foreground: #f5f5f5;
-  }
+html[data-theme="dark"] {
+  --background: #0f0f0f;
+  --foreground: #f5f5f5;
+  --primary: #a3c254;
+  --primary-foreground: #ffffff;
+  --secondary: #d4a574;
+  --secondary-foreground: #1a1a1a;
+  --accent: #6b8f6b;
+  --accent-foreground: #ffffff;
+  --muted: #262626;
+  --muted-foreground: #a3a3a3;
+  --border: #333333;
+  --ring: #a3c254;
+  --chat-bg: color-mix(in srgb, var(--primary) 10%, var(--background));
+  --chat-foreground: #f5f5f5;
 }
 
 * {

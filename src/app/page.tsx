@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Leaf, Truck, Shield, Star } from "lucide-react";
 import { products, formatPrice } from "@/data/products";
+import { OpenChatButton } from "@/components/chat/OpenChatButton";
 
 const features = [
   {
@@ -34,9 +35,7 @@ export default function HomePage() {
               en cada taza
             </h1>
             <p className="mt-6 text-lg text-muted-foreground">
-              Descubre nuestra selección de tés premium, cultivados con amor y
-              cuidado para llevar bienestar a tu vida diaria. Entregamos en
-              toda Medellín.
+              Encuentra nuestra selección de productos premium..
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Link
@@ -60,9 +59,9 @@ export default function HomePage() {
       {/* Features Section */}
       <section className="py-16 border-b border-border">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="flex flex-wrap gap-8">
             {features.map((feature) => (
-              <div key={feature.title} className="flex items-start gap-4">
+              <div key={feature.title} className="flex items-start gap-4 flex-[1_1_300px]">
                 <div className="flex-shrink-0 bg-primary/10 p-3 rounded-xl">
                   <feature.icon className="h-6 w-6 text-primary" />
                 </div>
@@ -91,12 +90,12 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="flex flex-wrap justify-center gap-6">
             {products.map((product) => (
               <Link
                 key={product.id}
                 href={`/producto/${product.slug}`}
-                className="group"
+                className="group width-[200px] max-w-100"
               >
                 <article className="bg-muted/50 rounded-2xl overflow-hidden border border-border hover:border-primary/50 transition-all hover:shadow-lg">
                   <div className="aspect-square bg-gradient-to-br from-primary/20 to-secondary/20 relative overflow-hidden">
@@ -152,14 +151,13 @@ export default function HomePage() {
             ¿Tienes preguntas sobre nuestros productos?
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Nuestro asistente virtual está disponible 24/7 para ayudarte.
+            Nuestro{" "}
+            <OpenChatButton className="text-primary font-semibold hover:underline cursor-pointer">
+              Asistente Nutricional Inteligente
+            </OpenChatButton>{" "}
+            está disponible 24/7 para ayudarte.
             ¡Escríbele en el chat!
           </p>
-          <div className="mt-6 lg:hidden">
-            <p className="text-sm text-primary font-medium">
-              Toca el ícono del chat en la esquina inferior derecha
-            </p>
-          </div>
         </div>
       </section>
     </div>

@@ -50,20 +50,22 @@ export default async function ProductPage({ params }: ProductPageProps) {
           Volver a productos
         </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+        <div className="flex flex-wrap gap-8 lg:gap-12">
           {/* Product Image */}
-          <div className="lg:sticky lg:top-8 lg:self-start aspect-square bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl overflow-hidden relative">
-            <Image
-              src={product.image}
-              alt={product.name}
-              fill
-              className="object-cover"
-              priority
-            />
+          <div className="flex-[1_1_300px] self-start">
+            <div className="aspect-square bg-linear-to-br from-primary/20 to-secondary/20 rounded-3xl overflow-hidden relative">
+              <Image
+                src={product.image}
+                alt={product.name}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
           </div>
 
           {/* Product Info */}
-          <div>
+          <div className="flex-[1_1_300px]">
             <div className="flex items-center gap-1 mb-3">
               {[...Array(5)].map((_, i) => (
                 <Star key={i} className="h-4 w-4 fill-secondary text-secondary" />

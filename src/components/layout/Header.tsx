@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, X, User, ShoppingBag } from "lucide-react";
+import { Menu, X, User, ShoppingBag, LogOut } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 import Logo from "../logo";
 
 const navigation = [
@@ -14,6 +15,7 @@ const navigation = [
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
@@ -55,13 +57,32 @@ export function Header() {
         </div> */}
 
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4">
-          <Link
-            href="/mi-cuenta"
-            className="flex items-center gap-2 text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
-          >
-            <User className="h-5 w-5" />
-            <span>Mi Cuenta</span>
-          </Link>
+          {user ? (
+            <>
+              <Link
+                href="/mi-cuenta"
+                className="flex items-center gap-2 text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
+              >
+                <User className="h-5 w-5" />
+                <span>{user.userMetadata?.fullName || "Mi Cuenta"}</span>
+              </Link>
+              <button
+                onClick={() => signOut()}
+                className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                title="Cerrar sesion"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/mi-cuenta"
+              className="flex items-center gap-2 text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
+            >
+              <User className="h-5 w-5" />
+              <span>Mi Cuenta</span>
+            </Link>
+          )}
           <button className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
             <ShoppingBag className="h-4 w-4" />
             <span>Carrito (0)</span>
@@ -87,13 +108,34 @@ export function Header() {
               {item.name}
             </Link>
           ))}
-          <Link
-            href="/mi-cuenta"
-            className="block rounded-lg px-3 py-2 text-base font-medium text-foreground/80 hover:bg-muted hover:text-primary"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Mi Cuenta
-          </Link>
+          {user ? (
+            <>
+              <Link
+                href="/mi-cuenta"
+                className="block rounded-lg px-3 py-2 text-base font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {user.userMetadata?.fullName || "Mi Cuenta"}
+              </Link>
+              <button
+                onClick={() => {
+                  signOut();
+                  setMobileMenuOpen(false);
+                }}
+                className="block w-full text-left rounded-lg px-3 py-2 text-base font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                Cerrar sesion
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/mi-cuenta"
+              className="block rounded-lg px-3 py-2 text-base font-medium text-foreground/80 hover:bg-muted hover:text-primary"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Mi Cuenta
+            </Link>
+          )}
           <div className="pt-2">
             <button className="w-full flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
               <ShoppingBag className="h-4 w-4" />

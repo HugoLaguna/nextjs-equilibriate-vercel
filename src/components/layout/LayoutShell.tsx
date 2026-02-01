@@ -30,7 +30,7 @@ export function LayoutShell({ children }: LayoutShellProps) {
           // Fixed values allow CSS to animate smoothly
           gridTemplateColumns: isCollapsed
             ? "calc(100% - 56px) 56px"
-            : "50% 50%",
+            : "1fr min(50%, 60rem)",
           transition: "grid-template-columns 300ms ease-in-out",
         }}
       >
