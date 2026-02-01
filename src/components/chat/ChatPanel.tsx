@@ -235,6 +235,9 @@ export function ChatPanel() {
                   <input
                     type="text"
                     value={input}
+                    style={{
+                      fontSize: "16px"
+                    }}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Escribe tu mensaje..."
                     maxLength={MAX_MESSAGE_LENGTH}
