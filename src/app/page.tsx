@@ -106,6 +106,18 @@ export default function HomePage() {
                       fill
                       className="object-cover group-hover:scale-110 transition-transform"
                     />
+                    {/* Availability Badge */}
+                    <div className="absolute top-3 right-3">
+                      {product.available ? (
+                        <span className="inline-flex items-center rounded-full bg-green-500 px-3 py-1 text-xs font-semibold text-white shadow-lg">
+                          Disponible
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center rounded-full bg-gray-500 px-3 py-1 text-xs font-semibold text-white shadow-lg">
+                          No disponible
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div className="p-4">
                     <div className="flex items-center gap-1 mb-2">

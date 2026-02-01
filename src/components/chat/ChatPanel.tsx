@@ -1,33 +1,23 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, PanelRightClose, PanelRightOpen } from "lucide-react";
+import { Send, Bot, User, PanelRightClose, PanelRightOpen, AlertCircle, Plus, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useChatContext } from "@/context/ChatContext";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
-
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
-}
-
-const initialMessages: Message[] = [
-  {
-    id: "1",
-    role: "assistant",
-    content: "¡Hola! Soy tu asistente de Equilibriate. ¿En qué puedo ayudarte hoy? Puedo responder preguntas sobre nuestros tés, ayudarte con tu pedido o darte recomendaciones personalizadas.",
-    timestamp: new Date(),
-  },
-];
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { useChat } from "@/hooks/useChat";
+import { MAX_MESSAGE_LENGTH } from "@/types/chat";
 
 export function ChatPanel() {
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const { isCollapsed, toggleCollapsed } = useChatContext();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const { conversation, conversations, sendMessage, createConversation, setActiveConversation, isLoading, error } = useChat();
+  const [showConversations, setShowConversations] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -35,33 +25,24 @@ export function ChatPanel() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [conversation?.messages]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || isLoading) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: input,
-      timestamp: new Date(),
-    };
+    // Validar longitud
+    if (input.length > MAX_MESSAGE_LENGTH) {
+      return; // El error se mostrará en el UI
+    }
 
-    setMessages((prev) => [...prev, userMessage]);
+    await sendMessage(input);
     setInput("");
-
-    // Simulated response - this will be connected to an agent later
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "Gracias por tu mensaje. En este momento estoy en modo de demostración. Pronto podré ayudarte con información sobre nuestros productos, realizar pedidos y mucho más.",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-    }, 1000);
   };
+
+  const messages = conversation?.messages || [];
+  const remainingChars = MAX_MESSAGE_LENGTH - input.length;
+  const isOverLimit = remainingChars < 0;
 
   // Mobile floating button
   const MobileToggle = () => (
@@ -75,7 +56,7 @@ export function ChatPanel() {
 
   return (
     <>
-      <MobileToggle />
+      {!isMobileOpen && <MobileToggle />}
 
       {/* Desktop Chat Panel */}
       <div
@@ -86,31 +67,88 @@ export function ChatPanel() {
       >
         {/* Header */}
         <div className={cn(
-          "flex items-center p-4 border-b border-white/10",
-          isCollapsed ? "justify-center" : "justify-between"
+          "flex flex-col border-b border-white/10",
+          isCollapsed ? "" : ""
         )}>
+          <div className={cn(
+            "flex items-center p-4",
+            isCollapsed ? "justify-center" : "justify-between"
+          )}>
+            {!isCollapsed && (
+              <div className="flex items-center gap-3">
+                <div className="bg-primary/20 p-2 rounded-full">
+                  <Bot className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-sm">Asistente Equilibriate</h2>
+                  <p className="text-xs text-chat-foreground/60">En línea</p>
+                </div>
+              </div>
+            )}
+            <button
+              onClick={toggleCollapsed}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              title={isCollapsed ? "Abrir chat" : "Cerrar chat"}
+            >
+              {isCollapsed ? (
+                <PanelRightOpen className="h-5 w-5" />
+              ) : (
+                <PanelRightClose className="h-5 w-5" />
+              )}
+            </button>
+          </div>
+
+          {/* Conversation Selector */}
           {!isCollapsed && (
-            <div className="flex items-center gap-3">
-              <div className="bg-primary/20 p-2 rounded-full">
-                <Bot className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="font-semibold text-sm">Asistente Equilibriate</h2>
-                <p className="text-xs text-chat-foreground/60">En línea</p>
-              </div>
+            <div className="px-4 pb-3 relative">
+              <button
+                onClick={() => setShowConversations(!showConversations)}
+                className="w-full flex items-center justify-between px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors text-sm"
+              >
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  <span className="truncate">{conversation?.title || "Nueva conversación"}</span>
+                </div>
+                <span className="text-xs text-chat-foreground/40">
+                  {conversations.length}
+                </span>
+              </button>
+
+              {/* Dropdown */}
+              {showConversations && (
+                <div className="absolute top-full left-4 right-4 mt-1 bg-chat-bg border border-white/10 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
+                  <button
+                    onClick={() => {
+                      createConversation();
+                      setShowConversations(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 hover:bg-white/10 transition-colors text-sm border-b border-white/10"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>Nueva conversación</span>
+                  </button>
+                  {conversations.map((conv) => (
+                    <button
+                      key={conv.id}
+                      onClick={() => {
+                        setActiveConversation(conv.id);
+                        setShowConversations(false);
+                      }}
+                      className={cn(
+                        "w-full flex items-center justify-between px-3 py-2 hover:bg-white/10 transition-colors text-sm text-left",
+                        conversation?.id === conv.id && "bg-white/10"
+                      )}
+                    >
+                      <span className="truncate flex-1">{conv.title}</span>
+                      <span className="text-xs text-chat-foreground/40 ml-2">
+                        {conv.messages.length - 1}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
-          <button
-            onClick={toggleCollapsed}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-            title={isCollapsed ? "Abrir chat" : "Cerrar chat"}
-          >
-            {isCollapsed ? (
-              <PanelRightOpen className="h-5 w-5" />
-            ) : (
-              <PanelRightClose className="h-5 w-5" />
-            )}
-          </button>
         </div>
 
         {/* Collapsed state - vertical text */}
@@ -161,7 +199,15 @@ export function ChatPanel() {
                             : "bg-white/10 rounded-tl-sm"
                         )}
                       >
-                        {message.content}
+                        {message.role === "assistant" ? (
+                          <div className="prose prose-sm max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 *:text-current">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {message.content}
+                            </ReactMarkdown>
+                          </div>
+                        ) : (
+                          message.content
+                        )}
                       </div>
                     </div>
                   ))}
@@ -178,21 +224,53 @@ export function ChatPanel() {
 
             {/* Input */}
             <form onSubmit={handleSubmit} className="p-4 border-t border-white/10">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Escribe tu mensaje..."
-                  className="flex-1 bg-white border border-gray-200 rounded-full px-4 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-gray-400"
-                />
-                <button
-                  type="submit"
-                  disabled={!input.trim()}
-                  className="bg-primary text-primary-foreground p-2 rounded-full hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Send className="h-5 w-5" />
-                </button>
+              {error && (
+                <div className="mb-2 p-2 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2 text-xs text-red-300">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>{error}</span>
+                </div>
+              )}
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Escribe tu mensaje..."
+                    maxLength={MAX_MESSAGE_LENGTH}
+                    disabled={isLoading}
+                    className={cn(
+                      "flex-1 bg-white border rounded-full px-4 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 placeholder:text-gray-400 disabled:opacity-50",
+                      isOverLimit
+                        ? "border-red-500 focus:ring-red-500/50"
+                        : "border-gray-200 focus:ring-primary/50"
+                    )}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!input.trim() || isLoading || isOverLimit}
+                    className="bg-primary text-primary-foreground p-2 rounded-full hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Send className="h-5 w-5" />
+                  </button>
+                </div>
+                <div className="flex justify-between text-xs px-2">
+                  <span className="text-chat-foreground/40">
+                    {isLoading ? "Enviando..." : ""}
+                  </span>
+                  <span
+                    className={cn(
+                      "transition-colors",
+                      isOverLimit
+                        ? "text-red-400 font-medium"
+                        : remainingChars < 50
+                        ? "text-yellow-400"
+                        : "text-chat-foreground/40"
+                    )}
+                  >
+                    {remainingChars} caracteres restantes
+                  </span>
+                </div>
               </div>
             </form>
           </>
@@ -203,22 +281,74 @@ export function ChatPanel() {
       {isMobileOpen && (
         <div className="lg:hidden fixed inset-0 z-40 bg-chat-bg text-chat-foreground flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-white/10">
-            <div className="flex items-center gap-3">
-              <div className="bg-primary/20 p-2 rounded-full">
-                <Bot className="h-5 w-5 text-primary" />
+          <div className="flex flex-col border-b border-white/10">
+            <div className="flex items-center justify-between p-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-primary/20 p-2 rounded-full">
+                  <Bot className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-sm">Asistente Equilibriate</h2>
+                  <p className="text-xs text-chat-foreground/60">En línea</p>
+                </div>
               </div>
-              <div>
-                <h2 className="font-semibold text-sm">Asistente Equilibriate</h2>
-                <p className="text-xs text-chat-foreground/60">En línea</p>
-              </div>
+              <button
+                onClick={() => setIsMobileOpen(false)}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <PanelRightClose className="h-5 w-5" />
+              </button>
             </div>
-            <button
-              onClick={() => setIsMobileOpen(false)}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-            >
-              <PanelRightClose className="h-5 w-5" />
-            </button>
+
+            {/* Conversation Selector Mobile */}
+            <div className="px-4 pb-3 relative">
+              <button
+                onClick={() => setShowConversations(!showConversations)}
+                className="w-full flex items-center justify-between px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors text-sm"
+              >
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  <span className="truncate">{conversation?.title || "Nueva conversación"}</span>
+                </div>
+                <span className="text-xs text-chat-foreground/40">
+                  {conversations.length}
+                </span>
+              </button>
+
+              {/* Dropdown Mobile */}
+              {showConversations && (
+                <div className="absolute top-full left-4 right-4 mt-1 bg-chat-bg border border-white/10 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
+                  <button
+                    onClick={() => {
+                      createConversation();
+                      setShowConversations(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 hover:bg-white/10 transition-colors text-sm border-b border-white/10"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>Nueva conversación</span>
+                  </button>
+                  {conversations.map((conv) => (
+                    <button
+                      key={conv.id}
+                      onClick={() => {
+                        setActiveConversation(conv.id);
+                        setShowConversations(false);
+                      }}
+                      className={cn(
+                        "w-full flex items-center justify-between px-3 py-2 hover:bg-white/10 transition-colors text-sm text-left",
+                        conversation?.id === conv.id && "bg-white/10"
+                      )}
+                    >
+                      <span className="truncate flex-1">{conv.title}</span>
+                      <span className="text-xs text-chat-foreground/40 ml-2">
+                        {conv.messages.length - 1}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Messages */}
@@ -255,7 +385,15 @@ export function ChatPanel() {
                           : "bg-white/10 rounded-tl-sm"
                       )}
                     >
-                      {message.content}
+                      {message.role === "assistant" ? (
+                        <div className="prose prose-sm max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&>*]:text-current">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {message.content}
+                          </ReactMarkdown>
+                        </div>
+                      ) : (
+                        message.content
+                      )}
                     </div>
                   </div>
                 ))}
@@ -266,21 +404,53 @@ export function ChatPanel() {
 
           {/* Input */}
           <form onSubmit={handleSubmit} className="p-4 border-t border-white/10">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Escribe tu mensaje..."
-                className="flex-1 bg-white border border-gray-200 rounded-full px-4 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-gray-400"
-              />
-              <button
-                type="submit"
-                disabled={!input.trim()}
-                className="bg-primary text-primary-foreground p-2 rounded-full hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Send className="h-5 w-5" />
-              </button>
+            {error && (
+              <div className="mb-2 p-2 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2 text-xs text-red-300">
+                <AlertCircle className="h-4 w-4" />
+                <span>{error}</span>
+              </div>
+            )}
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Escribe tu mensaje..."
+                  maxLength={MAX_MESSAGE_LENGTH}
+                  disabled={isLoading}
+                  className={cn(
+                    "flex-1 bg-white border rounded-full px-4 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 placeholder:text-gray-400 disabled:opacity-50",
+                    isOverLimit
+                      ? "border-red-500 focus:ring-red-500/50"
+                      : "border-gray-200 focus:ring-primary/50"
+                  )}
+                />
+                <button
+                  type="submit"
+                  disabled={!input.trim() || isLoading || isOverLimit}
+                  className="bg-primary text-primary-foreground p-2 rounded-full hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Send className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="flex justify-between text-xs px-2">
+                <span className="text-chat-foreground/40">
+                  {isLoading ? "Enviando..." : ""}
+                </span>
+                <span
+                  className={cn(
+                    "transition-colors",
+                    isOverLimit
+                      ? "text-red-400 font-medium"
+                      : remainingChars < 50
+                      ? "text-yellow-400"
+                      : "text-chat-foreground/40"
+                  )}
+                >
+                  {remainingChars} caracteres restantes
+                </span>
+              </div>
             </div>
           </form>
         </div>

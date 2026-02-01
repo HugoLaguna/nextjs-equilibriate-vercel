@@ -52,7 +52,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Product Image */}
-          <div className="aspect-square bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl overflow-hidden relative">
+          <div className="lg:sticky lg:top-8 lg:self-start aspect-square bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl overflow-hidden relative">
             <Image
               src={product.image}
               alt={product.name}
@@ -72,6 +72,20 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
 
             <h1 className="text-3xl font-bold text-foreground">{product.name}</h1>
+
+            {/* Availability Badge */}
+            <div className="mt-3">
+              {product.available ? (
+                <span className="inline-flex items-center rounded-full bg-green-500 px-4 py-1.5 text-sm font-semibold text-white">
+                  ✓ Disponible
+                </span>
+              ) : (
+                <span className="inline-flex items-center rounded-full bg-gray-500 px-4 py-1.5 text-sm font-semibold text-white">
+                  No disponible
+                </span>
+              )}
+            </div>
+
             <p className="mt-4 text-muted-foreground">{product.longDescription}</p>
 
             <p className="mt-6 text-3xl font-bold text-primary">
@@ -96,9 +110,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             {/* Add to Cart */}
             <div className="mt-8 flex gap-4">
-              <button className="flex-1 flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors">
+              <button
+                disabled={!product.available}
+                className={`flex-1 flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-colors ${
+                  product.available
+                    ? 'bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
+                }`}
+              >
                 <ShoppingBag className="h-5 w-5" />
-                Agregar al Carrito
+                {product.available ? 'Agregar al Carrito' : 'No Disponible'}
               </button>
             </div>
 
@@ -132,6 +153,65 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   ))}
                 </ul>
               </div>
+
+              {/* Nutrition Table */}
+              {product.nutritionTable && (
+                <div>
+                  <h3 className="font-semibold text-foreground mb-3">Información Nutricional</h3>
+                  <div className="bg-secondary/10 rounded-xl p-6 space-y-4">
+                    {/* Calories - Featured at top */}
+                    {product.calories !== undefined && (
+                      <div className="border-b-2 border-border pb-4">
+                        <div className="flex justify-between items-end">
+                          <span className="text-sm font-medium text-foreground">Calorías</span>
+                          <span className="text-4xl font-bold text-foreground">{product.calories}</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Rest of nutrition facts */}
+                    <div className="space-y-2">
+                      {Object.entries(product.nutritionTable)
+                        .filter(([key]) => key !== 'calorias') // Skip calories as it's shown above
+                        .map(([key, value]) => {
+                          const formattedKey = key
+                            .split('_')
+                            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                            .join(' ');
+
+                          if (typeof value === 'string') {
+                            return (
+                              <div key={key} className="flex justify-between items-center text-sm border-b border-border/50 pb-2 last:border-0 last:pb-0">
+                                <span className="font-medium text-foreground">{formattedKey}:</span>
+                                <span className="text-muted-foreground">{value}</span>
+                              </div>
+                            );
+                          } else {
+                            return (
+                              <div key={key} className="space-y-2">
+                                <div className="font-medium text-foreground text-sm">{formattedKey}:</div>
+                                <div className="pl-4 space-y-1">
+                                  {Object.entries(value).map(([subKey, subValue]) => {
+                                    const formattedSubKey = subKey
+                                      .split('_')
+                                      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                      .join(' ');
+                                    return (
+                                      <div key={subKey} className="flex justify-between items-center text-sm">
+                                        <span className="text-muted-foreground">{formattedSubKey}:</span>
+                                        <span className="text-muted-foreground">{subValue}</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          }
+                        })}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

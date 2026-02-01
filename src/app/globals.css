@@ -13,7 +13,7 @@
   --muted-foreground: #6b6b6b;
   --border: #e8e8e5;
   --ring: #8ca546;
-  --chat-bg: #f0f5f1;
+  --chat-bg: color-mix(in srgb, var(--primary) 10%, var(--background));
   --chat-foreground: #1a1a1a;
 }
 
@@ -49,7 +49,7 @@
     --muted-foreground: #a3a3a3;
     --border: #333333;
     --ring: #a3c254;
-    --chat-bg: #0a0a0a;
+    --chat-bg: color-mix(in srgb, var(--primary) 10%, var(--background));
     --chat-foreground: #f5f5f5;
   }
 }

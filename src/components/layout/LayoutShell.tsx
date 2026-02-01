@@ -1,7 +1,6 @@
 "use client";
 
 import { ReactNode } from "react";
-import { cn } from "@/lib/utils";
 import { useChatContext } from "@/context/ChatContext";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
@@ -16,20 +15,12 @@ export function LayoutShell({ children }: LayoutShellProps) {
 
   return (
     <>
-      {/* Mobile: Stack layout with fixed chat overlay */}
+      {/* Mobile: Stack layout - ChatPanel handles its own modal */}
       <div className="lg:hidden min-h-screen flex flex-col">
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
-        {/* Mobile chat overlay */}
-        <div
-          className={cn(
-            "fixed right-0 top-0 h-screen transition-all duration-300 ease-in-out z-50",
-            isCollapsed ? "w-14" : "w-full"
-          )}
-        >
-          <ChatPanel />
-        </div>
+        <ChatPanel />
       </div>
 
       {/* Desktop: CSS Grid layout with fluid columns */}
